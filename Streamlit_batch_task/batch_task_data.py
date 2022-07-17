@@ -18,12 +18,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--data_path", default="g1059778_Data.jsonl", type=str, help="Path to data from particular match.")
 
 
-def main(args):
+def load_data(data_path):
 
     config = read_config()
 
     player_performance_path = config['batch']['delta_player_dir']
     ball_performance_path = config['batch']['delta_ball_dir']
+
+
     app_spark_name = config['spark_application']['spark_app_batch_name']
 
     builder = (
@@ -34,7 +36,7 @@ def main(args):
 
     spark = configure_spark_with_delta_pip(builder).getOrCreate()
 
-    df = spark.read.json(args.data_path)
+    df = spark.read.json(data_path)
 
     base_columns = ['period','frameIdx','gameClock','wallClock','live','lastTouch','match_date','ball_inside_box']
 
@@ -42,7 +44,7 @@ def main(args):
         df
         .withColumn('match_date', F.from_unixtime(F.col('wallClock')/1000, 'yyyy-MM-dd'))
         .withColumn('match_timestamp',F.from_unixtime(F.col('wallClock')/1000, 'yyyy-MM-dd HH:mm:ss:SSS'))
-        .withColumn('ball_inside_box', ball_inside_box(F.col('ball.xyz')))
+        .withColumn('ball_inside_box', ball_inside_box(F.col('ball.xyz'),F.lit("inside_box")))
     )
 
     unified_df = (
@@ -67,30 +69,6 @@ def main(args):
     )
 
     #here we should load our data 
-
-    # if os.path.isdir(player_performance_path):
-
-    #     deltaTable = DeltaTable.forPath(spark, player_performance_path)
-
-    #     (
-    #         deltaTable.alias('oldData')
-    #         .merge(
-    #             unified_df.alias('newData'),
-    #             "oldData.match_date = newData.match_date"
-    #         )
-    #         .whenNotMatchedInsertAll()
-    #         .execute()
-    #     )
-    # else:
-
-    #     (
-    #         unified_df
-    #         .write
-    #         .format('delta')
-    #         .mode('overwrite')
-    #         .partitionBy('match_date')
-    #         .save(player_performance_path)
-    #     )
 
     # unified_df = spark.read.format("delta").load(player_performance_path)
 
@@ -211,6 +189,7 @@ def main(args):
             .save(player_performance_path)
         )
 
+
     # ball performance
 
     ball_perf = (
@@ -220,7 +199,7 @@ def main(args):
 
     ball_perf = (
         ball_perf
-        .groupBy("ball_inside_box")
+        .groupBy("ball_inside_box","match_date")
         .agg(
             (F.sum('ball_seconds')/60).alias("minutes_inside_box"),
              F.count("ball_inside_box").alias("n_times_inside_box")
@@ -251,9 +230,3 @@ def main(args):
             .partitionBy('match_date')
             .save(ball_performance_path)
         )
-
-
-
-if __name__ == '__main__':
-    args = parser.parse_args([] if "__file__" not in globals() else None)
-    main(args)

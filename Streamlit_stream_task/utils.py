@@ -33,10 +33,10 @@ def init_spark_session(app_name: t.Literal[str]) -> SparkSession:
 @F.udf(returnType=T.BooleanType())
 def ball_inside_box(
     ball_attr: t.Union[dict,list], 
-    field_dimen: tuple=(104.85,67.97),
-    check_type: str='inside_box'
+    check_type: str
     ):
 
+    field_dimen= (104.85,67.97)
     # ALL DIMENSIONS IN m
     meters_per_yard = 0.9144 # unit conversion from yards to meters
     half_pitch_length = field_dimen[0]/2. # length of half pitch
@@ -80,13 +80,12 @@ def ball_inside_box(
 
     return True if sum(bool_list) > 0 else False
 
-import matplotlib.pyplot as plt
-import numpy as np
+
 
 
 # The method below is copy-pasted from repo ...
 
-def plot_pitch( field_dimen = (106.0,68.0), field_color ='green', linewidth=2, markersize=20):
+def plot_pitch( field_dimen = (104.85,67.97), field_color ='green', linewidth=2, markersize=20):
     
     """ plot_pitch
     
