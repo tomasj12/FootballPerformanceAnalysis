@@ -1,0 +1,11 @@
+spark_application:
+  spark_app_batch_name: 'batchApp'
+  spark_app_stream_name: 'streamApp'
+streaming:
+  format: 'parquet'
+  file_checkpoint: '/home/tomas/Personal_projects/Aston_Villa/task_2/ballStreamDataCheckpoint'
+  file_dir: '/home/tomas/Personal_projects/Aston_Villa/task_2/ballStreamData'
+  wait_for_termination: None
+streaming_aggregation:
+  aggregating_time_s: 5600
+  wait_for_agg_s: 3
