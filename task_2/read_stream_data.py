@@ -40,8 +40,9 @@ def main():
         .withColumn("ballStatus",F.regexp_replace(F.split("ballAttributes",",").getItem(5),";",""))
         .withColumn("ballSpeed",F.split("ballAttributes",",").getItem(3))
         .withColumn("ballTeam",F.split("ballAttributes",",").getItem(4))
-        .withColumn("ballInsideBox",ball_inside_box("ballPosition"))
-        .select("match_timestamp","wallClock","ballAttributes",'ballPosition',"ballStatus","ballSpeed","ballTeam","ballInsideBox")
+        .withColumn("ballInsideBox",ball_inside_box("ballPosition",F.lit("inside_box")))
+        .withColumn("ballInsideField",ball_inside_box("ballPosition",F.lit("inside_field")))
+        .select("match_timestamp","wallClock","ballAttributes",'ballPosition',"ballStatus","ballSpeed","ballTeam","ballInsideBox","ballInsideField")
     )
 
 
