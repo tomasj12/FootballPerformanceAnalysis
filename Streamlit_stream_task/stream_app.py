@@ -2,7 +2,7 @@ import streamlit as st
 import subprocess
 import sys
 import time
-from utils import plot_pitch, init_spark_session,read_config, check_throw_corner
+from utils import plot_pitch, init_spark_session,read_config,check_throw_corner
 from bs4 import BeautifulSoup
 from datetime import datetime
 import os
