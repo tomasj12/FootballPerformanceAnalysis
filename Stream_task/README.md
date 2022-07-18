@@ -2,6 +2,10 @@
 
 **Goal** of this task was to simulate a streaming of the data from the particular match and then read this stream and try to make some live aggregations.
 
+**Output** The unified player/ball dataset in `delta` tables.
+
+**It is assumed, that user will place** `.dat` **files in this repository**.
+
 The high level diagram of this solution is described by the figure below.
 
 ![](streaming_diagram_.png)
@@ -15,10 +19,10 @@ If one wants to understand the whole process, I strongly recommend to first look
 
 However, before running one of the solution above, one need to build `Dockerfile` and run the stream process.
 
-`Dockerfile` load the chosen data in the directory (right now hardcoded, but can be parametrized), and run the `icp_server.py` script. This script is responsible for sending the stream of the data to the `localhost:9092`. The following code is necessary:
+`Dockerfile` load the chosen data in the directory, and run the `icp_server.py` script. This script is responsible for listening on `localhost:9898`. First we need build the `Dockerfile`:
 
 ```sh
-docker build -t streaming_process .
+docker build -t streaming_process . --build-arg=<PATH_TO_DATA>
 ```
 
 At last, there is `utils.py`, which includes all necessary helper functions:

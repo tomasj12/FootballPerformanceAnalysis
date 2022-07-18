@@ -1,6 +1,14 @@
 # Batch Task
 
-**Goal** of this task was to load, ingest and aggregate the historical data from the chosen match.
+**Goal** of this task is to load, ingest and aggregate the historical data from the chosen match.
+
+**Output** The unified player/ball dataset in `delta` tables.
+
+**It is assumed, that user will place** `.json` **files in this repository**.
+
+From my point of view, when we have incrementally get the data, `delta` table is good choice:
+* We can alway travel in the history and check the changes in the data (track the history of the table)
+* Instead of overwriting the data after each match, we can just do easy upsert into the table.
 
 The high level diagram of this solution is described by the figure below.
 
@@ -12,7 +20,7 @@ The user can run this solution in two ways:
 1. Run the solution with help of `jupyter` notebooks
 2. Run the solution with help of `shell`.
 
-If one wants to understand the whole process, I strongly recommend to first look on the `jupyter` notebooks, where is described in each cell the whole process. The `shell` solution is just copy paste solution from the `jupyter` jupyter notebooks.
+If one wants to understand the whole process, I strongly recommend to first look on the `jupyter` notebooks, where is described the whole process. The `shell` solution is just copy paste solution from the `jupyter` jupyter notebooks (without any particular comments).
 
 At last, there is `utils.py`, which includes all necessary helper functions:
 
@@ -24,12 +32,12 @@ At last, there is `utils.py`, which includes all necessary helper functions:
 
 ## Solution with jupyter notebook
 
-The solution in `jupyter` notebook can be found:
+In `jupyter` notebook solution can be found:
 
 * `load_save_unified_data.ipynb` is responsible for loading the raw match data and make some unecessary transformations. Then the dataset is saved as `delta` table.
 * `player_ball_performance.ipynb` is responsible for loading the unified dataset and make the desired aggregations.
 
-Again, I recommend to look on this files, to understand what is going on, if the one will decide to run a `shell` solution.
+Again, I recommend to look on these files to understand what is going on, if the one will decide to run a `shell` solution.
 
 **The most important is the order of the execution of the solution**:
 
