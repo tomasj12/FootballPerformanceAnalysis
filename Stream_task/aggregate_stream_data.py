@@ -4,8 +4,14 @@ import time
 from datetime import datetime
 import matplotlib.pyplot as plt
 import os
+import argparse
+from bs4 import BeautifulSoup
 
-def main():
+parser = argparse.ArgumentParser()
+parser.add_argument("--metadata_path", default="g1059778_Metadata.xml", type=str, help="Path to metadata from particular match.")
+
+
+def main(args):
 
     config = read_config()
 
@@ -19,6 +25,15 @@ def main():
 
     spark = init_spark_session(spark_app_name)
     plt.ion()
+
+    with open(args.meta_data_path,'r') as f:
+        metadata = f.read()
+
+    bs = BeautifulSoup(metadata,'xml')
+    x_size = float(bs.find('match').get('fPitchXSizeMeters'))
+    y_size = float(bs.find('match').get('fPitchYSizeMeters'))
+    pitch_dim = (x_size,y_size)
+
 
     now = datetime.now()
     delta = 0
@@ -86,5 +101,7 @@ def main():
     print("Finisihed") 
 
 if __name__ == '__main__':
-    main()
+    
+    args = parser.parse_args([] if "__file__" not in globals() else None)
+    main(args)
         

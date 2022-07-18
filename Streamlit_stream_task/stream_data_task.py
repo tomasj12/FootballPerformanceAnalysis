@@ -5,7 +5,6 @@ from utils import init_spark_session, read_config,ball_inside_box
 def main():
     config = read_config()
     spark_app_name = config['spark_application']['spark_app_stream_name']
-    print(config)
     checkpoint = config['streaming']['file_checkpoint']
     file_location = config['streaming']['file_dir']
     termination = config['streaming']['wait_for_termination']
