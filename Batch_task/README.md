@@ -2,6 +2,11 @@
 
 **Goal** of this task was to load, ingest and aggregate the historical data from the chosen match.
 
+The high level diagram of this solution is described by the figure below.
+
+
+![](batch_architecture.png)
+
 The user can run this solution in two ways:
 
 1. Run the solution with help of `jupyter` notebooks
