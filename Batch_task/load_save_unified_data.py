@@ -92,6 +92,7 @@ def main(args):
             F.col("ball.speed").alias("ballSpeed"),
             *base_columns
         )
+        .withColumn("ballInsideBox",ball_inside_box(F.col('ballPosition'),F.lit("inside_box")))
     )
 
     if os.path.isdir(delta_player_path):

@@ -18,8 +18,8 @@ def app():
 
     config = read_config()
 
-    player_performance_path = config['batch']['delta_player_dir']
-    ball_performance_path = config['batch']['delta_ball_dir']
+    player_performance_path = config['batch']['delta_features_player_dir']
+    ball_performance_path = config['batch']['delta_features_ball_dir']
 
     app_spark_name = config['spark_application']['spark_app_batch_name']
 
@@ -78,7 +78,6 @@ def app():
                 metadata = f.read()
             bs = BeautifulSoup(metadata, 'xml')
             match_date = bs.find('match').get('dtDate').split(' ')[0]
-
             if not os.path.isdir(Path(player_performance_path)/ f"match_date={match_date}"):
                 data_load_state = st.text('Loading data...')
                 write_delta(data_path=data_path)
@@ -95,23 +94,33 @@ def app():
                 df_pd_ball = delta_to_pd(delta_path=ball_performance_path)
                 data_load_state.text("Done! (using st.cache)")
 
-    col1,col2 = st.columns(2)
+    col1,col2,col3 = st.columns(3)
     
     if st.checkbox('Show raw data'):
-        col1.subheader('Sample from raw data')
-        col1.write(df_pd_players.sample(10))
-        col2.subheader("Ball performance")
-        col2.write(df_pd_ball)
+        df_pd_players_home = df_pd_players[df_pd_players['away_home_team'] == 'home']
+        df_pd_players_away = df_pd_players[df_pd_players['away_home_team'] == 'away']
+        col1.subheader('Sample from home team players')
+        col1.write(df_pd_players_home.sample(10))
+        col2.subheader('Sample from home team players')
+        col2.write(df_pd_players_away)
+        col3.subheader("Ball performance")
+        col3.write(df_pd_ball)
 
     options = st.multiselect(
             'Player performances',
             ['The fastest players', 'The slowest players'],
             )
     
+    col4,col5 = st.columns(2)
+
     if options:
         stat_data = delta_to_pd(delta_path=player_performance_path, filters=options)
-        st.subheader(options[0])
-        st.write(stat_data)
+        stat_data_home = stat_data[stat_data['away_home_team'] == 'home']
+        stat_data_away = stat_data[stat_data['away_home_team'] == 'away']
+        col4.subheader('Home team' + options[0])
+        col4.write(stat_data_home)
+        col5.subheader('Away team' + options[0])
+        col5.write(stat_data_away)
 
     
 

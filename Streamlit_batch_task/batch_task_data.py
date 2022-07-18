@@ -73,9 +73,11 @@ def load_data(data_path):
 
     unified_ball_df = (
         match_date_df
+        .withColumn("ballInsideBox",ball_inside_box("ball.xyz",F.lit("inside_box")))
         .select(
             F.col("ball.xyz").alias("ballPosition"),
             F.col("ball.speed").alias("ballSpeed"),
+            F.col("ballInsideBox"),
             *base_columns
         )
     )
@@ -176,45 +178,45 @@ def load_data(data_path):
     )
 
 
-    if os.path.isdir(delta_feature_player_dir):
+    # if os.path.isdir(delta_feature_player_dir):
 
-        deltaTable = DeltaTable.forPath(spark, delta_feature_player_dir)
+    #     deltaTable = DeltaTable.forPath(spark, delta_feature_player_dir)
 
-        (
-            deltaTable.alias('oldData')
-            .merge(
-                player_perf_final_df.alias('newData'),
-                "oldData.playerId = newData.playerId"
-            )
-            .whenNotMatchedInsertAll()
-            .execute()
-        )
-    else:
+    #     (
+    #         deltaTable.alias('oldData')
+    #         .merge(
+    #             player_perf_final_df.alias('newData'),
+    #             "oldData.playerId = newData.playerId and oldData.match_date = oldData.match_date"
+    #         )
+    #         .whenNotMatchedInsertAll()
+    #         .execute()
+    #     )
+    # else:
 
-        (
-            player_perf_final_df
-            .write
-            .format('delta')
-            .mode('overwrite')
-            .partitionBy('match_date')
-            .save(delta_feature_player_dir)
-        )
+    #     (
+    #         player_perf_final_df
+    #         .write
+    #         .format('delta')
+    #         .mode('overwrite')
+    #         .partitionBy('match_date')
+    #         .save(delta_feature_player_dir)
+    #     )
 
     # ball performance
 
     ball_perf_df = (
         unified_ball_df
-        .withColumn('ball_seconds',F.when(F.col('ball_inside_box') == True, 0.04).otherwise(0))
+        .withColumn('ball_seconds',F.when(F.col('ballInsideBox') == True, 0.04).otherwise(0))
     )
 
     ball_perf_df_final = (
         ball_perf_df
-        .groupBy("ball_inside_box")
+        .groupBy("ballInsideBox","match_date")
         .agg(
             (F.sum('ball_seconds')/60).alias("minutes_inside_box"),
-                F.count("ball_inside_box").alias("n_times_inside_box")
+                F.count("ballInsideBox").alias("n_times_inside_box")
         )
-        .filter(F.col("ball_inside_box") == True)
+        .filter(F.col("ballInsideBox") == True)
     )
 
     if os.path.isdir(delta_feature_ball_dir):

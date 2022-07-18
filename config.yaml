@@ -1,16 +1,16 @@
 spark_application:
-  spark_app_batch_name: 'batchApp'
-  spark_app_stream_name: 'streamApp'
+  spark_app_batch_name: 'batchApp' # name of the spark application for batch task
+  spark_app_stream_name: 'streamApp' # name of the spark application for streaming task
 batch:
-  delta_player_dir: '/home/tomas/Personal_projects/Aston_Villa/task_1/PlayerPerformanceData'
-  delta_ball_dir: '/home/tomas/Personal_projects/Aston_Villa/task_1/BallData'
-  delta_features_player_dir: '/home/tomas/Personal_projects/Aston_Villa/task_1/PlayerAggregations'
-  delta_features_ball_dir: '/home/tomas/Personal_projects/Aston_Villa/task_1/BallAggregations'
-streaming:
-  format: 'parquet'
-  file_checkpoint: '/home/tomas/Personal_projects/Aston_Villa/task_2/ballStreamDataCheckpoint'
-  file_dir: '/home/tomas/Personal_projects/Aston_Villa/task_2/ballStreamData'
-  wait_for_termination: None
-streaming_aggregation:
-  aggregating_time_s: 5600
-  wait_for_agg_s: 3
+  delta_player_dir: '/home/tomas/Personal_projects/Aston_Villa/Batch_task/PlayerPerformanceData' # path, where unified player data will be saved, as delta table
+  delta_ball_dir: '/home/tomas/Personal_projects/Aston_Villa/Batch_task/BallData' # path, where unified ball data will be saved, as delta table
+  delta_features_player_dir: '/home/tomas/Personal_projects/Aston_Villa/Batch_task/PlayerAggregations' # path, where aggregated players data will be saved, as delta table
+  delta_features_ball_dir: '/home/tomas/Personal_projects/Aston_Villa/Batch_task/BallAggregations' # path, where aggregated ball data will be saved, as delta table
+streaming: # parameters for streaming task
+  format: 'parquet' # parquet format
+  file_checkpoint: '/home/tomas/Personal_projects/Aston_Villa/Stream_task/ballStreamDataCheckpoint' # checkpoint file
+  file_dir: '/home/tomas/Personal_projects/Aston_Villa/Stream_task/ballStreamData' # file, where streaming data will be saved
+  wait_for_termination: None # waiting for the termination
+streaming_aggregation: # streaming aggregation
+  aggregating_time_s: 5600 # in seconds, after we stop we aggregating - 5600seconds ~ 93min
+  wait_for_agg_s: 3 # how long we will update live dashboards
