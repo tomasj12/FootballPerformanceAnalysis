@@ -1,89 +1,67 @@
+# Import the modules
 from pyspark.sql import SparkSession
+from pyspark.sql.window import Window
 import pyspark.sql.functions as F
 import pyspark.sql.types as T
 from delta import *
-from utils import ball_inside_box, read_config
+from utils import plot_pitch, ball_inside_box, read_config
+from bs4 import BeautifulSoup
 import os
 import argparse
-from pyspark.sql.window import Window
-from bs4 import BeautifulSoup
 
-
-# TODO: dat tu normalne natvrdo check, ci existuje uz zapisany frame, a ked nie, tak nech ho vytvori a 
-# ked hej, tak nech pokracuje a nech zapise tu deltu tabulku..
 
 
 parser = argparse.ArgumentParser()
-# These arguments will be set appropriately by ReCodEx, even if you change them.
-parser.add_argument("--data_path", default="g1059778_Data.jsonl", type=str, help="Path to data from particular match.")
+parser.add_argument("--metadata_path", default="g1059778_Metadata.xml", type=str, help="Path to metadata from particular match.")
 
-
-def load_data(data_path):
+def main(args):
 
     config = read_config()
 
-    delta_feature_player_dir = config['batch']['delta_features_player_dir']
-    delta_feature_ball_dir = config['batch']['delta_features_ball_dir']
-    app_spark_name = config['spark_application']['spark_app_batch_name']
-
-    app_spark_name = config['spark_application']['spark_app_batch_name']
+    app_name = config['spark_application']['spark_app_batch_name']
 
     builder = (
-        SparkSession.builder.appName(app_spark_name)
+        SparkSession.builder.appName(app_name) 
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") 
         .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
     )
 
     spark = configure_spark_with_delta_pip(builder).getOrCreate()
 
-    raw_match_data_df = (
+    meta_data_path = args.metadata_path
+    delta_player_path = config['batch']['delta_player_dir']
+    delta_ball_path = config['batch']['delta_ball_dir']
+    delta_feature_player_dir = config['batch']['delta_features_player_dir']
+    delta_feature_ball_dir = config['batch']['delta_features_ball_dir']
+
+
+    with open(meta_data_path,'r') as f:
+        metadata = f.read()
+
+    match_metadata = BeautifulSoup(metadata,'xml')
+
+    metadata_match_data = match_metadata.find('match').get('dtDate').split(' ')[0]
+    field_x = float(match_metadata.find('match').get('fPitchXSizeMeters'))
+    field_y = float(match_metadata.find('match').get('fPitchYSizeMeters'))
+    metadata_field_dim = (field_x,field_y)
+
+    print(f"Match date: {metadata_match_data}")
+    print(f"Field dimension: {metadata_field_dim}")
+
+    unified_data_players_df = (
         spark
         .read
-        .json(data_path)
+        .format("delta")
+        .load(delta_player_path)
     )
 
-    match_date_df = (
-        raw_match_data_df
-        .withColumn('match_date', F.from_unixtime(F.col('wallClock')/1000, 'yyyy-MM-dd')) 
-        .withColumn('match_timestamp',F.from_unixtime(F.col('wallClock')/1000, 'yyyy-MM-dd HH:mm:ss:S'))
+    unified_data_ball_df = (
+        spark
+        .read
+        .format("delta")
+        .load(delta_ball_path)
     )
 
-    base_columns = ['period','frameIdx','gameClock','wallClock','live','lastTouch','match_date']
-
-    unified_players_df = (
-        match_date_df
-        .withColumn('home_players_exploded',F.explode('homePlayers')) 
-        .withColumn('away_players_exploded',F.explode('awayPlayers'))
-        .select(
-            F.col('home_players_exploded.playerId').alias('homePlayer_playerId'),
-            F.col('home_players_exploded.speed').alias('homePlayer_speed'),
-            F.col('home_players_exploded.xyz').alias('homePlayer_3d_position'),
-            F.col('away_players_exploded.playerId').alias('awayPlayer_playerId'),
-            F.col('away_players_exploded.speed').alias('awayPlayer_speed'),
-            F.col('away_players_exploded.xyz').alias('awayPlayer_3d_position'),
-            *base_columns
-        )
-        .withColumn("home_player_3d_position_x", F.col('homePlayer_3d_position').getItem(0))
-        .withColumn("home_player_3d_position_y", F.col('homePlayer_3d_position').getItem(1))
-        .withColumn("home_player_3d_position_z", F.col('homePlayer_3d_position').getItem(2))
-        .withColumn("away_player_3d_position_x", F.col('awayPlayer_3d_position').getItem(0))
-        .withColumn("away_player_3d_position_y", F.col('awayPlayer_3d_position').getItem(1))
-        .withColumn("away_player_3d_position_z", F.col('awayPlayer_3d_position').getItem(2))
-    )
-
-    unified_ball_df = (
-        match_date_df
-        .withColumn("ballInsideBox",ball_inside_box("ball.xyz",F.lit("inside_box")))
-        .select(
-            F.col("ball.xyz").alias("ballPosition"),
-            F.col("ball.speed").alias("ballSpeed"),
-            F.col("ballInsideBox"),
-            *base_columns
-        )
-    )
-
-    # Aggregation
-    
     # Define the window functions
     windowTop = Window.partitionBy("away_home_team").orderBy(F.col("player_avg_speed").desc())
 
@@ -93,14 +71,13 @@ def load_data(data_path):
     windowTimeDelta_away = Window.partitionBy("awayPlayer_playerId").orderBy("period")
 
     # Take the relevant columns
-    columns = unified_players_df.columns
+    columns = unified_data_players_df.columns
 
     home_columns = [col for col in columns if col.startswith('home')] + base_columns
     away_columns = [col for col in columns if col.startswith('away')] + base_columns
 
-
     home_players_df = (
-        unified_players_df
+        unified_data_players_df
         .select(home_columns)
         .dropDuplicates()
     )
@@ -131,7 +108,7 @@ def load_data(data_path):
     )
 
     away_players_df = (
-        unified_players_df
+        unified_data_players_df
         .select(away_columns)
         .dropDuplicates()
     )
@@ -161,7 +138,6 @@ def load_data(data_path):
         .withColumn("away_home_team",F.lit("away"))
     )
 
-
     players_performance_df = (
         home_grouped_df
         .union(away_grouped_df)
@@ -172,11 +148,11 @@ def load_data(data_path):
         .union(away_x_dir_df)
     )
 
+
     player_perf_final_df = (
         players_performance_df
         .join(speed_x_dir_df.select("playerId","maximum_speed_x"), on = ['playerId'], how = 'left')
     )
-
 
     if os.path.isdir(delta_feature_player_dir):
 
@@ -186,7 +162,7 @@ def load_data(data_path):
             deltaTable.alias('oldData')
             .merge(
                 player_perf_final_df.alias('newData'),
-                "oldData.playerId = newData.playerId and oldData.match_date = oldData.match_date"
+                "oldData.playerId = newData.playerId"
             )
             .whenNotMatchedInsertAll()
             .execute()
@@ -201,22 +177,20 @@ def load_data(data_path):
             .partitionBy('match_date')
             .save(delta_feature_player_dir)
         )
-
-    # ball performance
-
+    
     ball_perf_df = (
-        unified_ball_df
-        .withColumn('ball_seconds',F.when(F.col('ballInsideBox') == True, 0.04).otherwise(0))
+        unified_data_ball_df
+        .withColumn('ball_seconds',F.when(F.col('ball_inside_box') == True, 0.04).otherwise(0))
     )
 
     ball_perf_df_final = (
         ball_perf_df
-        .groupBy("ballInsideBox","match_date")
+        .groupBy("ball_inside_box")
         .agg(
             (F.sum('ball_seconds')/60).alias("minutes_inside_box"),
-                F.count("ballInsideBox").alias("n_times_inside_box")
+                F.count("ball_inside_box").alias("n_times_inside_box")
         )
-        .filter(F.col("ballInsideBox") == True)
+        .filter(F.col("ball_inside_box") == True)
     )
 
     if os.path.isdir(delta_feature_ball_dir):
@@ -227,7 +201,7 @@ def load_data(data_path):
             deltaTable.alias('oldData')
             .merge(
                 ball_perf_df_final.alias('newData'),
-                "oldData.match_date = newData.match_date"
+                "oldData.playerId = newData.playerId"
             )
             .whenNotMatchedInsertAll()
             .execute()
@@ -242,3 +216,8 @@ def load_data(data_path):
             .partitionBy('match_date')
             .save(delta_feature_ball_dir)
         )
+
+
+
+    
+

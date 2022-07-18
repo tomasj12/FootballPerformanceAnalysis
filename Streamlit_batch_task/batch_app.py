@@ -117,9 +117,9 @@ def app():
         stat_data = delta_to_pd(delta_path=player_performance_path, filters=options)
         stat_data_home = stat_data[stat_data['away_home_team'] == 'home']
         stat_data_away = stat_data[stat_data['away_home_team'] == 'away']
-        col4.subheader('Home team' + options[0])
+        col4.subheader('Home team ' + options[0].lower())
         col4.write(stat_data_home)
-        col5.subheader('Away team' + options[0])
+        col5.subheader('Away team ' + options[0].lower())
         col5.write(stat_data_away)
 
     

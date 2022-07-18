@@ -37,7 +37,7 @@ def main(args):
     )
 
 
-    with open(args.meta_data_path,'r') as f:
+    with open(args.metadata_path,'r') as f:
         metadata = f.read()
 
     match_metadata = BeautifulSoup(metadata,'xml')
@@ -57,9 +57,10 @@ def main(args):
         .withColumn('match_timestamp',F.from_unixtime(F.col('wallClock')/1000, 'yyyy-MM-dd HH:mm:ss:S'))
     )
 
+    print("Sample of the raw data.")
+
     (
         match_date_df
-        .select('wallClock','match_date','match_timestamp')
     ).show(5,truncate=False)
 
     base_columns = ['period','frameIdx','gameClock','wallClock','live','lastTouch','match_date']
@@ -95,6 +96,10 @@ def main(args):
         .withColumn("ballInsideBox",ball_inside_box(F.col('ballPosition'),F.lit("inside_box")))
     )
 
+    print("Sample of the unified data")
+
+    unified_ball_df.show(10,truncate=False)
+
     if os.path.isdir(delta_player_path):
 
         deltaTable = DeltaTable.forPath(spark, delta_player_path)
@@ -118,6 +123,8 @@ def main(args):
             .partitionBy('match_date')
             .save(delta_player_path)
         )
+
+    print(f"Player data are sucessfully saved in {delta_player_path}")
     
     if os.path.isdir(delta_ball_path):
 
@@ -140,8 +147,10 @@ def main(args):
             .format('delta')
             .mode('overwrite')
             .partitionBy('match_date')
-            .save(delta_player_path)
+            .save(delta_ball_path)
         )
+
+    print(f"Ball data are sucessfully saved in {delta_ball_path}")
 
 if __name__ == '__main__':
 

@@ -24,9 +24,8 @@ def main(args):
     wait_time = config['streaming_aggregation']['wait_for_agg_s']
 
     spark = init_spark_session(spark_app_name)
-    plt.ion()
 
-    with open(args.meta_data_path,'r') as f:
+    with open(args.metadata_path,'r') as f:
         metadata = f.read()
 
     bs = BeautifulSoup(metadata,'xml')
@@ -40,11 +39,8 @@ def main(args):
     init_ball_status = 'Alive'
     init_ball_position = False # ball is not in the penalty box at the beginning
     init_field_position = True
-    field_dimen = (104.85,67.97)
-    fig,ax = plot_pitch(field_dimen)
+    field_dimen = pitch_dim
     
-    xy_init = (0,0)
-
     if os.path.isdir(file_dir):
             
         while delta < agg_time:
@@ -96,9 +92,6 @@ def main(args):
             init_field_position = field_position
             init_ball_status = alive
             xy_init = xy_position
-
-
-    print("Finisihed") 
 
 if __name__ == '__main__':
     
