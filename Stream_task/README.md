@@ -4,7 +4,7 @@
 
 The high level diagram of this solution is described by the figure below.
 
-![](streaming_diagram.png)
+![](streaming_diagram_.png)
 
 The user can run this solution in two ways:
 
