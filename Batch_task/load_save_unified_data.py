@@ -80,6 +80,9 @@ def main(args):
         .withColumn("home_player_3d_position_x", F.col('homePlayer_3d_position').getItem(0))
         .withColumn("home_player_3d_position_y", F.col('homePlayer_3d_position').getItem(1))
         .withColumn("home_player_3d_position_z", F.col('homePlayer_3d_position').getItem(2))
+        .withColumn("away_player_3d_position_x", F.col('awayPlayer_3d_position').getItem(0))
+        .withColumn("away_player_3d_position_y", F.col('awayPlayer_3d_position').getItem(1))
+        .withColumn("away_player_3d_position_z", F.col('awayPlayer_3d_position').getItem(2))
     )
 
     unified_ball_df = (
