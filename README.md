@@ -1,6 +1,6 @@
 # Aston Villa technical challenge
 
-Dear review,
+Dear reviewer,
 
 this readme is mainly for introduction to this repository. First of all, the whole solution is based on `spark` and `pyspark`, where both version needs to be the same. I am using the version `3.2.0`. The whole solution was developed on the local machine, therefore I face some issues (e.g low memory, not good configuration of the spark, etc.). If you are planning to install the spark on your machine (I am using `Ubuntu 20.04`), please follow [this manual](https://phoenixnap.com/kb/install-spark-on-ubuntu). The versions of the other packages can be found in `requirements.txt`
 
