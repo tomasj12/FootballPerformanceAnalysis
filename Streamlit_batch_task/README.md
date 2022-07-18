@@ -10,7 +10,7 @@ In this folder, user can found streamlit application `batch_app.py`, which funct
 * The fastest/slowest players
 * The performance of the ball
 
-The simple animation can be found in `streamlit-batch_app-2022-07-18-20-07-88.gif`.
+The simple animation can be found in `streamlit-batch_app-2022-07-18-22-07-74.gif`.
 
 For running the application, `streamlit` module is needed. 
 
