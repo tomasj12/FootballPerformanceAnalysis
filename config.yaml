@@ -5,6 +5,7 @@ batch:
   delta_player_dir: '/home/tomas/Personal_projects/Aston_Villa/task_1/PlayerPerformanceData'
   delta_ball_dir: '/home/tomas/Personal_projects/Aston_Villa/task_1/BallData'
   delta_features_player_dir: '/home/tomas/Personal_projects/Aston_Villa/task_1/PlayerAggregations'
+  delta_features_ball_dir: '/home/tomas/Personal_projects/Aston_Villa/task_1/BallAggregations'
 streaming:
   format: 'parquet'
   file_checkpoint: '/home/tomas/Personal_projects/Aston_Villa/task_2/ballStreamDataCheckpoint'
