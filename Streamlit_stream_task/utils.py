@@ -81,6 +81,24 @@ def ball_inside_box(
     return True if sum(bool_list) > 0 else False
 
 
+def check_throw_corner(field_dimen: tuple, ball_pos: tuple):
+
+    # ALL DIMENSIONS IN m
+    half_pitch_length = field_dimen[0]/2. # length of half pitch
+    half_pitch_width = field_dimen[1]/2. # width of half pitch
+
+    p = ball_pos
+
+    if (p[0] > -half_pitch_length and p[0] < half_pitch_length) and (p[1] > half_pitch_width or p[1] < -half_pitch_width):
+        pos = 'throw'
+        y = half_pitch_width + 1 if p[1] > half_pitch_width else -half_pitch_width - 1
+        adjust_p = (p[0],y)
+    elif (p[0] < -half_pitch_length or p[0] > half_pitch_length) and (p[1] < half_pitch_width and p[1] > -half_pitch_width):
+        pos = 'corner'
+        x = half_pitch_length - 1 if p[0] < -half_pitch_length else half_pitch_length + 1
+        adjust_p = (x,p[1])
+
+    return pos, adjust_p
 
 
 # The method below is copy-pasted from repo ...
