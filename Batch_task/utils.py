@@ -9,16 +9,35 @@ from pathlib import Path
 import yaml
 from yaml.loader import SafeLoader
 
+# Path to config
 CONFIG_PATH = Path('/home/tomas/Personal_projects/Aston_Villa/config.yaml')
 
-def read_config(path: Path=CONFIG_PATH) -> dict:
+def read_config(path: str) -> dict:
+
+    """Reads a .yaml file, which include the config for the solution.
+
+    Args:
+        path (str): A path to the config file.
+
+    Returns:
+        config (dict): Dictionary, where each key represents one config.
+    """
 
     with open(path) as file:
         config = yaml.load(file, Loader=SafeLoader)
     
     return config
 
-def init_spark_session(app_name: t.Literal[str]) -> SparkSession:
+def init_spark_session(app_name: str) -> SparkSession:
+
+    """Initialize the spark session.
+
+    Args:
+       app_name (str): Name of the spark application.
+
+    Returns:
+        SparkSession: Returns an initialized spark session.
+    """
     
     spark = (
         SparkSession \
@@ -34,7 +53,18 @@ def init_spark_session(app_name: t.Literal[str]) -> SparkSession:
 def ball_inside_box(
     ball_attr: t.Union[dict,list], 
     check_type: str='inside_box'
-    ):
+    ) -> bool:
+
+    """Helper UDF function for checking, if the ball is inside the penalty are 
+       on inside the field.
+    
+    Args:
+       ball_attr (t.Union[dict,list]): The ball position.
+       check_type (str): If the function will check if the ball is inside penalty area or inside the field.
+
+    Returns:
+        Functions return `True`, when the ball is inside the penalty area/field, otherwise False.
+    """
 
     field_dimen = (104.85,67.97)
      # ALL DIMENSIONS IN m
@@ -88,9 +118,9 @@ def ball_inside_box(
         return inside
 
 
-# The method below is copy-pasted from repo ...
+# The method below is copy-pasted from repo: https://github.com/Friends-of-Tracking-Data-FoTD/LaurieOnTracking
 
-def plot_pitch( field_dimen = (106.0,68.0), field_color ='green', linewidth=2, markersize=20):
+def plot_pitch(field_dimen: tuple = (106.0,68.0), field_color: str='green', linewidth: int=2, markersize: int=20):
     
     """ plot_pitch
     
