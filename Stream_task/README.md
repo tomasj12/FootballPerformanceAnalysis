@@ -2,6 +2,10 @@
 
 **Goal** of this task was to simulate a streaming of the data from the particular match and then read this stream and try to make some live aggregations.
 
+The high level diagram of this solution is described by the figure below.
+
+![](streaming_diagram.png)
+
 The user can run this solution in two ways:
 
 1. Run the solution with help of `jupyter` notebooks

@@ -52,3 +52,4 @@ The solution in `python` scripts can be found:
 
 Each aggregated table will be shown in `stdout`.
 
+
