@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup
 
 parser = argparse.ArgumentParser()
 # These arguments will be set appropriately by ReCodEx, even if you change them.
-parser.add_argument("--data_path", default="g1059778_Data.jsonl", type=str, help="Path to data from particular match.")
+parser.add_argument("--data_path", default="<JSONL_FILE>", type=str, help="Path to data from particular match.")
 
 
 def load_data(data_path):
