@@ -9,8 +9,8 @@ from pyspark.sql.window import Window
 from bs4 import BeautifulSoup
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--data_path", default="g1059778_Data.jsonl", type=str, help="Path to data from particular match.")
-parser.add_argument("--metadata_path", default="g1059778_Metadata.xml", type=str, help="Path to metadata from particular match.")
+parser.add_argument("--data_path", default="<JSONL_FILE>", type=str, help="Path to data from particular match.")
+parser.add_argument("--metadata_path", default="<MATCH_METADATA>", type=str, help="Path to metadata from particular match.")
 
 
 
