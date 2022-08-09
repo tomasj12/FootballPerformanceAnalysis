@@ -2,14 +2,14 @@ spark_application:
   spark_app_batch_name: 'batchApp' # name of the spark application for batch task
   spark_app_stream_name: 'streamApp' # name of the spark application for streaming task
 batch:
-  delta_player_dir: '/home/tomas/Personal_projects/Aston_Villa/Batch_task/PlayerPerformanceData' # path, where unified player data will be saved, as delta table
-  delta_ball_dir: '/home/tomas/Personal_projects/Aston_Villa/Batch_task/BallData' # path, where unified ball data will be saved, as delta table
-  delta_features_player_dir: '/home/tomas/Personal_projects/Aston_Villa/Batch_task/PlayerAggregations' # path, where aggregated players data will be saved, as delta table
-  delta_features_ball_dir: '/home/tomas/Personal_projects/Aston_Villa/Batch_task/BallAggregations' # path, where aggregated ball data will be saved, as delta table
+  delta_player_dir: '<DELTA_PLAYER_DIR>' # path, where unified player data will be saved, as delta table
+  delta_ball_dir: '<DELTA_BALL_DIR>' # path, where unified ball data will be saved, as delta table
+  delta_features_player_dir: '<DELTA_FEATURES_PLAYER_DIR>' # path, where aggregated players data will be saved, as delta table
+  delta_features_ball_dir: '<DELTA_FEATURES_BALL_DIR>' # path, where aggregated ball data will be saved, as delta table
 streaming: # parameters for streaming task
   format: 'parquet' # parquet format
-  file_checkpoint: '/home/tomas/Personal_projects/Aston_Villa/Stream_task/ballStreamDataCheckpoint' # checkpoint file
-  file_dir: '/home/tomas/Personal_projects/Aston_Villa/Stream_task/ballStreamData' # file, where streaming data will be saved
+  file_checkpoint: '<FILE_CHECKPOINT>' # checkpoint file
+  file_dir: '<FILE_DIR>' # file, where streaming data will be saved
   wait_for_termination: None # waiting for the termination
 streaming_aggregation: # streaming aggregation
   aggregating_time_s: 5600 # in seconds, after we stop we aggregating - 5600seconds ~ 93min
