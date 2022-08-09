@@ -1,4 +1,4 @@
-# Aston Villa technical challenge
+# Player performance analysis
 
 Dear reviewer,
 
